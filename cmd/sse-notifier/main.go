@@ -67,8 +67,8 @@ type User struct {
 // Storage
 var (
 	// Ticket storage (temporary, single-use)
-	ticketsByUserID = make(map[string]*Ticket)
-	ticketsMu       sync.RWMutex
+	ticketsByTicketID = make(map[string]*Ticket)
+	ticketsMu         sync.RWMutex
 
 	// Company channels (one channel per company)
 	companyChannelsByCompanyID = make(map[string]*CompanyChannel)
@@ -282,7 +282,7 @@ func handleStoreTicket(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ticketsMu.Lock()
-	ticketsByUserID[req.UserID] = ticket
+	ticketsByTicketID[ticketID] = ticket
 	ticketsMu.Unlock()
 
 	log.Printf("[TICKET] ✓ Stored: user=%s company=%s ticket=%s", req.Email, req.CompanyID, ticketID)
@@ -307,13 +307,13 @@ func consumeTicket(ticketID string) *Ticket {
 	ticketsMu.Lock()
 	defer ticketsMu.Unlock()
 
-	ticket, exists := ticketsByUserID[ticketID]
+	ticket, exists := ticketsByTicketID[ticketID]
 	if !exists {
 		return nil
 	}
 
 	// Single-use: delete after consumption
-	delete(ticketsByUserID, ticketID)
+	delete(ticketsByTicketID, ticketID)
 	return ticket
 }
 
@@ -542,7 +542,7 @@ func handleHealth(w http.ResponseWriter, r *http.Request) {
 
 func handleStats(w http.ResponseWriter, r *http.Request) {
 	ticketsMu.RLock()
-	ticketCount := len(ticketsByUserID)
+	ticketCount := len(ticketsByTicketID)
 	ticketsMu.RUnlock()
 
 	companyChannelsMu.RLock()
@@ -597,9 +597,9 @@ func cleanupStaleTickets() {
 	staleThreshold := 5 * time.Minute
 	deleted := 0
 
-	for id, ticket := range ticketsByUserID {
+	for id, ticket := range ticketsByTicketID {
 		if now.Sub(ticket.CreatedAt) > staleThreshold {
-			delete(ticketsByUserID, id)
+			delete(ticketsByTicketID, id)
 			deleted++
 		}
 	}
