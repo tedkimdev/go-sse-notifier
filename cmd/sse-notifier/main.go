@@ -461,7 +461,7 @@ func sendEvent(w http.ResponseWriter, eventType string, data any) {
 // ============================================================================
 
 type NotificationRequest struct {
-	CompanyID string `json:"companyIdd"`
+	CompanyID string `json:"companyId"`
 	ByUser    string `json:"byUser"`
 	Title     string `json:"title"`
 	Message   string `json:"message"`
