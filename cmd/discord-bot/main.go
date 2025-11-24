@@ -215,7 +215,7 @@ func sendToDiscord(req NotificationRequest, timestamp time.Time) error {
 		Color:       0x5865F2, // Discord blurple color
 		Timestamp:   timestamp.Format(time.RFC3339),
 		Footer: &DiscordEmbedFooter{
-			Text: "Stampit Notification",
+			Text: "Internal Notification",
 		},
 	}
 
